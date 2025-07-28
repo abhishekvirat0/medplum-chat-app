@@ -278,13 +278,13 @@ export function ChatProvider({
   }, [profile, threads, threadCommMap]);
 
   // Query setup for subscription
-  const subscriptionQuery = useMemo(
-    () => ({
+  const subscriptionQuery = useMemo(() => {
+    const subjectRef = profile ? getReferenceString(profile) : undefined;
+    return {
       "part-of:missing": true,
-      subject: profile?.resourceType === "Patient" ? getReferenceString(profile) : undefined,
-    }),
-    [profile],
-  );
+      subject: subjectRef,
+    };
+  }, [profile]);
 
   // Query for fetching threads (including messages)
   const threadsQuery = useMemo(
@@ -349,7 +349,10 @@ export function ChatProvider({
         // Sync the thread
         setThreads((prev) => syncResourceArray(prev, communication));
         // Sync the thread messages
-        receiveThread(communication.id!);
+        const threadId = communication.partOf?.[0]?.reference?.split("/")[1];
+        if (threadId) {
+          receiveThread(threadId);
+        }
       },
       [receiveThread],
     ),
