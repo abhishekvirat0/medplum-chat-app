@@ -139,19 +139,18 @@ async function touchThreadLastChanged({
   threadId: string;
   value: string;
 }): Promise<void> {
-  const patch: { op: "replace"; path: string; value: { url: string; valueDateTime: string }[] }[] =
-    [
-      {
-        op: "replace",
-        path: "/extension",
-        value: [
-          {
-            url: "https://medplum.com/last-changed",
-            valueDateTime: value,
-          },
-        ],
-      },
-    ];
+  const patch: { op: "add"; path: string; value: { url: string; valueDateTime: string }[] }[] = [
+    {
+      op: "add",
+      path: "/extension",
+      value: [
+        {
+          url: "https://medplum.com/last-changed",
+          valueDateTime: value,
+        },
+      ],
+    },
+  ];
   await medplum.patchResource("Communication", threadId, patch);
 }
 
