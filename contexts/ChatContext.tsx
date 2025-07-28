@@ -139,19 +139,13 @@ async function touchThreadLastChanged({
   threadId: string;
   value: string;
 }): Promise<void> {
-  const patch: { op: "add"; path: string; value: { url: string; valueDateTime: string }[] }[] = [
+  await medplum.patchResource("Communication", threadId, [
     {
       op: "add",
-      path: "/extension",
-      value: [
-        {
-          url: "https://medplum.com/last-changed",
-          valueDateTime: value,
-        },
-      ],
+      path: "/extension/0/valueDateTime",
+      value,
     },
-  ];
-  await medplum.patchResource("Communication", threadId, patch);
+  ]);
 }
 
 async function createThreadMessageComm({
@@ -278,13 +272,13 @@ export function ChatProvider({
   }, [profile, threads, threadCommMap]);
 
   // Query setup for subscription
-  const subscriptionQuery = useMemo(() => {
-    const subjectRef = profile ? getReferenceString(profile) : undefined;
-    return {
+  const subscriptionQuery = useMemo(
+    () => ({
       "part-of:missing": true,
-      subject: subjectRef,
-    };
-  }, [profile]);
+      subject: profile?.resourceType === "Patient" ? getReferenceString(profile) : undefined,
+    }),
+    [profile],
+  );
 
   // Query for fetching threads (including messages)
   const threadsQuery = useMemo(
@@ -349,10 +343,7 @@ export function ChatProvider({
         // Sync the thread
         setThreads((prev) => syncResourceArray(prev, communication));
         // Sync the thread messages
-        const threadId = communication.partOf?.[0]?.reference?.split("/")[1];
-        if (threadId) {
-          receiveThread(threadId);
-        }
+        receiveThread(communication.id!);
       },
       [receiveThread],
     ),
