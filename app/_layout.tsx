@@ -27,7 +27,7 @@ import { NotificationsProvider } from "@/contexts/NotificationsContext";
 import { oauth2ClientId } from "@/utils/medplum-oauth2";
 
 export const unstable_settings = {
-  initialRouteName: "/(app)",
+  initialRouteName: "(app)",
 };
 
 SplashScreen.preventAutoHideAsync();
